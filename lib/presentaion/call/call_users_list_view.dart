@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/presentaion/call/call_model/contant_model.dart';
 import 'package:flutter_application_1/presentaion/call/call_user_view.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CallUsersListView extends StatelessWidget {
   const CallUsersListView({super.key});
@@ -36,13 +38,16 @@ class CallUsersListView extends StatelessWidget {
             Divider(height: 24),
             Expanded(
               child: ListView.separated(
+                
                 itemBuilder: (c, n) {
-                  return ItemCallInList();
+                  return ItemCallInList(
+                    contact: contactList[n],
+                  );
                 },
                 separatorBuilder: (c, n) {
                   return Divider(height: 24);
                 },
-                itemCount: 20,
+                itemCount: contactList.length,
               ),
             ),
           ],
@@ -53,60 +58,77 @@ class CallUsersListView extends StatelessWidget {
 }
 
 class ItemCallInList extends StatelessWidget {
-  const ItemCallInList({super.key});
+  const ItemCallInList({super.key,required this.contact});
+final ContactModel contact;
+Future<void> callNumber(String phoneNumber) async {
+  final Uri uri = Uri.parse('tel:$phoneNumber');
+
+  if (await canLaunchUrl(uri)) {
+    await launchUrl(
+      uri,
+      mode: LaunchMode.externalApplication,
+    );
+  } else {
+    throw 'Cannot launch phone dialer';
+  }
+}
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        CircleAvatar(
-          backgroundImage: AssetImage("assets/images/girl.png"),
-          radius: 32,
-          backgroundColor: Colors.amberAccent,
-        ),
-        SizedBox(width: 18),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Sama",
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
+    return GestureDetector(
+      onTap: ()async { await
+        callNumber(contact.number);},
+      child: Row(
+        children: [
+          CircleAvatar(
+            backgroundImage: AssetImage(contact.image),
+            radius: 32,
+            backgroundColor: Colors.amberAccent,
+          ),
+          SizedBox(width: 18),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                contact.name,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                contact.subTitle,
+                style: TextStyle(fontSize: 12, color: Colors.black),
+              ),
+            ],
+          ),
+          Spacer(),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => CallUserView()),
+              );
+            },
+            child: CircleAvatar(
+              backgroundColor: Colors.red,
+              radius: 28,
+              child: CircleAvatar(
+                backgroundColor: Colors.white,
+                radius: 26,
+                child: Icon(Icons.call, size: 32, color: Colors.red),
               ),
             ),
-            Text(
-              "My sister",
-              style: TextStyle(fontSize: 12, color: Colors.black),
-            ),
-          ],
-        ),
-        Spacer(),
-        GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => CallUserView()),
-            );
-          },
-          child: CircleAvatar(
-            backgroundColor: Colors.red,
-            radius: 28,
-            child: CircleAvatar(
-              backgroundColor: Colors.white,
-              radius: 26,
-              child: Icon(Icons.call, size: 32, color: Colors.red),
-            ),
           ),
-        ),
-        SizedBox(width: 12),
-        CircleAvatar(
-          backgroundColor: Colors.red,
-          radius: 28,
-          child: Icon(Icons.video_call, size: 32, color: Colors.white),
-        ),
-      ],
+         // SizedBox(width: 12),
+          // CircleAvatar(
+          //   backgroundColor: Colors.red,
+          //   radius: 28,
+          //   child: Icon(Icons.video_call, size: 32, color: Colors.white),
+          // ),
+        ],
+      ),
     );
   }
 }
